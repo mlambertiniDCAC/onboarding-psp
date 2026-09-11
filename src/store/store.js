@@ -4,10 +4,12 @@ import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import profileReducer from "../slices/profile/profileSlice";
 import cvuActivationReducer from "../features/activateAccountCvu/store/cvuActivation/cvuActivationSlice";
+import authReducer from "../features/auth/authSlice";
 
 const rootReducer = combineReducers({
   profile: profileReducer,
   cvuActivation: cvuActivationReducer,
+  auth: authReducer,
 });
 
 export const persistConfig = {

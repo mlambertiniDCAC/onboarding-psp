@@ -5,13 +5,10 @@ import federation from "@originjs/vite-plugin-federation";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
 
-  if (
-    mode === "production" &&
-    (!env.VITE_DCAC_URL || !env.VITE_APIGW_PSP_URL)
-  ) {
+  if (mode === "production" && !env.VITE_APIGW_PSP_URL) {
     throw new Error(
-      "[onboarding-psp] Build de producción sin VITE_DCAC_URL / VITE_APIGW_PSP_URL. " +
-        "Completá .env.production (o inyectá las variables) con las URLs públicas del host DCAC y de apigateway-psp."
+      "[onboarding-psp] Build de producción sin VITE_APIGW_PSP_URL. " +
+        "Completá .env.production (o inyectá la variable) con la URL pública de apigateway-psp."
     );
   }
 
@@ -24,9 +21,6 @@ export default defineConfig(({ mode }) => {
         filename: "remoteEntry.js",
         exposes: {
           "./App": "./src/AppWrapper",
-        },
-        remotes: {
-          dcac: `${env.VITE_DCAC_URL}/assets/remoteEntry.js`,
         },
         shared: {
           react: { singleton: true, eager: true },

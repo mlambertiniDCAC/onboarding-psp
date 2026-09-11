@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import profileReducer from "../slices/profile/profileSlice";
 import cvuActivationReducer from "../features/activateAccountCvu/store/cvuActivation/cvuActivationSlice";
+import authReducer from "../features/auth/authSlice";
 import App from "../App";
 
 vi.mock("../lib/axiosInstance", () => ({
@@ -13,12 +14,27 @@ vi.mock("../lib/axiosInstance", () => ({
     post: async () => ({ data: {} }),
     put: async () => ({ data: {} }),
   }),
-  default: { get: async () => ({ data: {} }) },
+  default: {
+    get: async () => ({ data: {} }),
+    post: async () => ({ data: {} }),
+  },
+}));
+
+vi.mock("../lib/authStorage", () => ({
+  authStorage: {
+    getToken: () => "test-token",
+    setToken: () => {},
+    clear: () => {},
+  },
 }));
 
 const makeStore = () =>
   configureStore({
-    reducer: { profile: profileReducer, cvuActivation: cvuActivationReducer },
+    reducer: {
+      profile: profileReducer,
+      cvuActivation: cvuActivationReducer,
+      auth: authReducer,
+    },
     middleware: (g) => g({ serializableCheck: false }),
   });
 
@@ -32,10 +48,10 @@ const renderAt = (initialEntries) =>
   );
 
 describe("App mount", () => {
-  it("shows the missing-id notice with no ref", async () => {
+  it("asks for the sujetoId with no ref and no manual entry", async () => {
     renderAt(["/"]);
     expect(
-      await screen.findByText(/Falta el identificador del sujeto/i)
+      await screen.findByText(/Ingresá el sujetoId de la sociedad/i)
     ).toBeTruthy();
   });
 

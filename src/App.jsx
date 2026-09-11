@@ -1,28 +1,33 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styled, { ThemeProvider } from "styled-components";
 import { lightTheme } from "./assets/themes";
 import { ensureFonts } from "./lib/ensureFonts";
 import { setDefaultSociety } from "./slices/profile/profileSlice";
 import { resolveRefExterna } from "./bootstrap/resolveRefExterna";
+import { loggedOut } from "./features/auth/authSlice";
+import LoginPage from "./features/auth/LoginPage";
+import SujetoIdForm from "./features/onboarding/SujetoIdForm";
+import { Button } from "./components/Button";
 import ActivateAccountCvu from "./features/activateAccountCvu/pages/ActivateAccountCvu";
 
-const Centered = styled.div`
+const TopBar = styled.div`
   display: flex;
-  min-height: 60vh;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  text-align: center;
-  color: ${({ theme }) => theme.colors.neutral[600]};
+  justify-content: flex-end;
+  padding: 12px 24px;
 `;
 
-const App = (props) => {
+const App = () => {
   const dispatch = useDispatch();
   const { search } = useLocation();
+  const token = useSelector((state) => state.auth.token);
+  const [manualSujetoId, setManualSujetoId] = useState(null);
 
-  const { refExterna, razonSocial } = resolveRefExterna({ props, search });
+  const { refExterna: refExternaFromUrl, razonSocial } = resolveRefExterna({
+    search,
+  });
+  const refExterna = manualSujetoId ?? refExternaFromUrl;
 
   useEffect(() => {
     ensureFonts();
@@ -39,17 +44,33 @@ const App = (props) => {
     }
   }, [dispatch, refExterna, razonSocial]);
 
+  if (!token) {
+    return (
+      <ThemeProvider theme={lightTheme}>
+        <LoginPage />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={lightTheme}>
+      <TopBar>
+        <Button
+          tone="neutral"
+          role="secondary"
+          size="small"
+          type="button"
+          onClick={() => dispatch(loggedOut())}
+        >
+          Cerrar sesión
+        </Button>
+      </TopBar>
       {refExterna ? (
         <Routes>
           <Route path="*" element={<ActivateAccountCvu />} />
         </Routes>
       ) : (
-        <Centered>
-          Falta el identificador del sujeto. Abrí esta pantalla desde el flujo
-          de onboarding o agregá <code>?ref=&lt;id&gt;</code> a la URL.
-        </Centered>
+        <SujetoIdForm onSubmit={setManualSujetoId} />
       )}
     </ThemeProvider>
   );

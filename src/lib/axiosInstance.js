@@ -1,110 +1,71 @@
 import axios from "axios";
-import devAxiosInstance from "./devAxiosInstance";
+import { authStorage } from "./authStorage";
 
-const isDevStandalone =
-  import.meta.env.DEV && import.meta.env.VITE_ENABLE_LOGIN === "true";
-
-/**
- * Axios instance para el remote (dcpFront)
- * Importa y aplica el interceptor de autenticación del host (dcac)
- * usando Module Federation
- */
-
-// Crear instancia de axios propia del remote
-const axiosPublic = axios.create({
+const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APIGW_PSP_URL || "",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-let isInitialized = false;
-let initializationPromise = null;
+let isRefreshing = false;
+let failedQueue = [];
 
-/**
- * Importa attachAuthInterceptor del host
- * Retorna null si no está disponible (fallback para desarrollo standalone)
- */
-const getAuthInterceptor = async () => {
-  try {
-    // Importación dinámica del módulo expuesto por el host
-    const module = await import("dcac/axiosInstance");
+const processQueue = (error) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    error ? reject(error) : resolve();
+  });
+  failedQueue = [];
+};
 
-    // Verificar que la función esté disponible
-    if (
-      typeof (module?.default || module?.attachAuthInterceptor) === "function"
-    ) {
-      return module.default || module.attachAuthInterceptor;
+const forceLogout = () => {
+  authStorage.clear();
+  window.location.reload();
+};
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = authStorage.getToken();
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    const status = error.response?.status;
+
+    if (status !== 401 || originalRequest?._retry || !authStorage.getToken()) {
+      if (status === 401) forceLogout();
+      return Promise.reject(error);
     }
 
-    console.warn(
-      "[axiosInstance] attachAuthInterceptor no encontrado en el módulo del host"
-    );
-    return null;
-  } catch (error) {
-    // Fallback: el remote funciona sin auth si no puede conectar con el host
-    // Útil para desarrollo standalone
-    console.warn(
-      "[axiosInstance] No se pudo cargar attachAuthInterceptor del host. " +
-        "El remote funcionará sin autenticación.",
-      error
-    );
-    return null;
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(() => axiosInstance(originalRequest));
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      await axiosInstance.post("/v1/auth/refresh");
+      processQueue(null);
+      return axiosInstance(originalRequest);
+    } catch (refreshError) {
+      processQueue(refreshError);
+      forceLogout();
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
-};
+);
 
-/**
- * Inicializa el interceptor de autenticación
- * Debe llamarse antes de usar axiosPublic
- */
-const initAuthInterceptor = async () => {
-  if (isDevStandalone || isInitialized) return;
+export const getAxiosInstance = async () => axiosInstance;
 
-  if (!initializationPromise) {
-    initializationPromise = (async () => {
-      try {
-        const attachAuthInterceptor = await getAuthInterceptor();
-
-        if (attachAuthInterceptor) {
-          // Aplicar el interceptor del host a nuestra instancia
-          attachAuthInterceptor(axiosPublic);
-          console.info(
-            "[axiosInstance] Interceptor de autenticación aplicado desde el host"
-          );
-        } else {
-          console.warn(
-            "[axiosInstance] Funcionando sin interceptor de autenticación. " +
-              "Asegúrate de que el host está disponible."
-          );
-        }
-      } catch (error) {
-        console.error(
-          "[axiosInstance] Error inicializando interceptor de autenticación:",
-          error
-        );
-      } finally {
-        isInitialized = true;
-      }
-    })();
-  }
-
-  return initializationPromise;
-};
-
-/**
- * Obtiene la instancia de axios ya inicializada con el interceptor
- */
-export const getAxiosInstance = async () => {
-  if (isDevStandalone) return devAxiosInstance;
-
-  await initAuthInterceptor();
-  return axiosPublic;
-};
-
-// Auto-inicialización al importar el módulo
-// Esto intenta aplicar el interceptor inmediatamente
-if (!isDevStandalone) {
-  initAuthInterceptor().catch(console.error);
-}
-
-export default isDevStandalone ? devAxiosInstance : axiosPublic;
+export default axiosInstance;
