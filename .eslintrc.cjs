@@ -1,6 +1,7 @@
 module.exports = {
   root: true,
   env: { browser: true, es2020: true },
+  globals: { __APIGW_PSP_URL__: "readonly" },
   extends: [
     "eslint:recommended",
     "plugin:react/recommended",

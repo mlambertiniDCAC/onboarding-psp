@@ -2,7 +2,7 @@ import axios from "axios";
 import { authStorage } from "./authStorage";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APIGW_PSP_URL || "",
+  baseURL: __APIGW_PSP_URL__ || "",
   headers: {
     "Content-Type": "application/json",
   },

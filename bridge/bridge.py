@@ -3,7 +3,7 @@ import os
 import requests
 from flask import Flask, Response, request
 
-APIGW_PSP_URL = os.environ.get("APIGW_PSP_URL", "http://localhost:8010").rstrip("/")
+APIGW_PSP_URL = os.environ.get("APIGW_PSP_URL", "http://localhost:8010/").rstrip("/")
 PORT = int(os.environ.get("BRIDGE_PORT", "9000"))
 
 app = Flask(__name__)

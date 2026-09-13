@@ -26,6 +26,6 @@ ngrok http 9000
 ```
 
 Tomá la URL pública que imprime ngrok (`https://xxxx.ngrok-free.app`) y
-cargala como `VITE_APIGW_PSP_URL` en las env vars de Vercel del proyecto
+cargala como `APIGW_PSP_URL` en las env vars de Vercel del proyecto
 `onboarding-psp`. Cada vez que ngrok se reinicia la URL cambia, así que hay
 que actualizar la env var y redeployar.

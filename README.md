@@ -27,7 +27,7 @@ final en onboarding.
 
 ```bash
 npm install
-cp .env.example .env.development   # completar VITE_APIGW_PSP_URL
+cp .env.example .env.development   # completar APIGW_PSP_URL
 npm run dev
 # abrir http://localhost:5175/
 ```
@@ -52,7 +52,7 @@ Vercel (onboarding-psp) → https://<túnel>.ngrok-free.app → bridge (local, :
 1. Con la VPN activa, levantar el bridge: ver `bridge/README.md`.
 2. Exponerlo con `ngrok http 9000` (o `cloudflared tunnel` para una URL
    estable).
-3. En Vercel, setear `VITE_APIGW_PSP_URL` = la URL pública del túnel.
+3. En Vercel, setear `APIGW_PSP_URL` = la URL pública del túnel.
 4. Deploy (build-time: Vite hornea la variable en el bundle).
 
 El bridge no agrega autenticación propia — reenvía el `Authorization` tal

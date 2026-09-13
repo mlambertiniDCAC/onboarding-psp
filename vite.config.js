@@ -5,15 +5,18 @@ import federation from "@originjs/vite-plugin-federation";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
 
-  if (mode === "production" && !env.VITE_APIGW_PSP_URL) {
+  if (mode === "production" && !env.APIGW_PSP_URL) {
     throw new Error(
-      "[onboarding-psp] Build de producción sin VITE_APIGW_PSP_URL. " +
+      "[onboarding-psp] Build de producción sin APIGW_PSP_URL. " +
         "Completá .env.production (o inyectá la variable) con la URL pública de apigateway-psp."
     );
   }
 
   return {
     base: "/",
+    define: {
+      __APIGW_PSP_URL__: JSON.stringify(env.APIGW_PSP_URL || ""),
+    },
     plugins: [
       react(),
       federation({
