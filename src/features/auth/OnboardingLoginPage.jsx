@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { Typography } from "src/components/Typography";
 import { Button } from "src/components/Button";
 import axiosInstance from "src/lib/axiosInstance";
+import { setDefaultSociety } from "src/slices/profile/profileSlice";
 import { loginSuccess } from "./authSlice";
 
 const OPERADOR_NOMBRE = "Operador";
@@ -60,6 +61,7 @@ const OnboardingLoginPage = () => {
         apellido: OPERADOR_APELLIDO,
       });
       dispatch(loginSuccess({ ...response.data, sujetoId: values.sujetoId }));
+      dispatch(setDefaultSociety({ id: values.sujetoId }));
     } catch (error) {
       setApiError(
         error.response?.data?.message || "No se pudo abrir la sesión."
