@@ -5,6 +5,7 @@ const axiosInstance = axios.create({
   baseURL: __APIGW_PSP_URL__ || "",
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
