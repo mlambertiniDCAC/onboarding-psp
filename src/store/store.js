@@ -4,13 +4,23 @@ import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import profileReducer from "../slices/profile/profileSlice";
 import cvuActivationReducer from "../features/activateAccountCvu/store/cvuActivation/cvuActivationSlice";
-import authReducer from "../features/auth/authSlice";
+import authReducer, {
+  loginSuccess,
+  loggedOut,
+} from "../features/auth/authSlice";
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
   profile: profileReducer,
   cvuActivation: cvuActivationReducer,
   auth: authReducer,
 });
+
+const rootReducer = (state, action) => {
+  if (action.type === loginSuccess.type || action.type === loggedOut.type) {
+    state = state && { ...state, cvuActivation: undefined };
+  }
+  return appReducer(state, action);
+};
 
 export const persistConfig = {
   key: "onboarding-psp",
