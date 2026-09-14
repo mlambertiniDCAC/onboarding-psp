@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
+import { useSearchParams } from "react-router-dom";
 import axiosInstance from "src/lib/axiosInstance";
 import { Typography } from "src/components/Typography";
+import { STEP_QUERY_PARAM } from "src/features/activateAccountCvu/lib/constants";
 
 const COMPLIANCE_ESTADO = {
   SIN_SOLICITUD: "sin_solicitud",
@@ -20,13 +22,14 @@ const Wrapper = styled.div`
 `;
 
 const ComplianceStatusGate = ({ sujetoId, children }) => {
+  const [searchParams] = useSearchParams();
+  const step = searchParams.get(STEP_QUERY_PARAM);
   const [estado, setEstado] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
     setError(null);
     axiosInstance
       .get(`/v1/compliance/${sujetoId}/estado`)
@@ -38,14 +41,14 @@ const ComplianceStatusGate = ({ sujetoId, children }) => {
           setError("No pudimos consultar el estado del compliance.");
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) setHasLoadedOnce(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [sujetoId]);
+  }, [sujetoId, step]);
 
-  if (isLoading) {
+  if (!hasLoadedOnce) {
     return (
       <Wrapper>
         <Typography variant="regular">

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { ThemeProvider } from "styled-components";
+import { MemoryRouter, useSearchParams } from "react-router-dom";
 import { lightTheme } from "../../../assets/themes";
 import ComplianceStatusGate from "../ComplianceStatusGate";
 
@@ -18,13 +19,15 @@ vi.mock("src/lib/axiosInstance", () => {
   };
 });
 
-const renderGate = async (sujetoId) => {
+const renderGate = async (sujetoId, initialEntries = ["/"]) => {
   render(
-    <ThemeProvider theme={lightTheme}>
-      <ComplianceStatusGate sujetoId={sujetoId}>
-        <div>contenido del wizard</div>
-      </ComplianceStatusGate>
-    </ThemeProvider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <ThemeProvider theme={lightTheme}>
+        <ComplianceStatusGate sujetoId={sujetoId}>
+          <div>contenido del wizard</div>
+        </ComplianceStatusGate>
+      </ThemeProvider>
+    </MemoryRouter>
   );
 };
 
@@ -57,5 +60,44 @@ describe("ComplianceStatusGate", () => {
     await renderGate("999999");
 
     expect(await screen.findByText(/contenido del wizard/i)).toBeTruthy();
+  });
+
+  it("re-chequea al cambiar de paso y bloquea si mientras tanto pasó a en_revision", async () => {
+    const axiosInstance = await import("src/lib/axiosInstance");
+    axiosInstance.__setEstado("en_progreso");
+
+    const Harness = () => {
+      const [searchParams, setSearchParams] = useSearchParams();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => setSearchParams({ step: "2" })}
+          >
+            ir al paso 2
+          </button>
+          <ComplianceStatusGate sujetoId="444444">
+            <div>contenido del wizard</div>
+          </ComplianceStatusGate>
+        </>
+      );
+    };
+
+    render(
+      <MemoryRouter initialEntries={["/?step=3"]}>
+        <ThemeProvider theme={lightTheme}>
+          <Harness />
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText(/contenido del wizard/i)).toBeTruthy();
+
+    axiosInstance.__setEstado("en_revision");
+    fireEvent.click(screen.getByText(/ir al paso 2/i));
+
+    expect(
+      await screen.findByText(/Tiene un compliance en revisión/i)
+    ).toBeTruthy();
   });
 });
