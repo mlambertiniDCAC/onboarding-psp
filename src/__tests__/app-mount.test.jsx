@@ -51,10 +51,10 @@ const renderWith = (preloadedAuth) =>
   );
 
 describe("App mount", () => {
-  it("shows the login screen (mail + sujetoId) with no session", async () => {
+  it("shows the login screen (mail + Sociedad_ID) with no session", async () => {
     renderWith(null);
     expect(await screen.findByText(/^Mail$/i)).toBeTruthy();
-    expect(await screen.findByText(/^sujetoId$/i)).toBeTruthy();
+    expect(await screen.findByText(/^Sociedad_ID$/i)).toBeTruthy();
   });
 
   it("mounts the wizard intro with an active session", async () => {

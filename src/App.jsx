@@ -11,6 +11,7 @@ import OnboardingLoginPage from "./features/auth/OnboardingLoginPage";
 import { Button } from "./components/Button";
 import ActivateAccountCvu from "./features/activateAccountCvu/pages/ActivateAccountCvu";
 import IdentityValidationStep from "./features/identityValidation/IdentityValidationStep";
+import ComplianceStatusGate from "./features/complianceStatus/ComplianceStatusGate";
 import {
   CVU_ACTIVATION_STEP,
   PERSON_TYPE,
@@ -89,7 +90,14 @@ const App = () => {
         </Button>
       </TopBar>
       <Routes>
-        <Route path="*" element={<CvuWizardGate sujetoId={sujetoId} />} />
+        <Route
+          path="*"
+          element={
+            <ComplianceStatusGate sujetoId={sujetoId}>
+              <CvuWizardGate sujetoId={sujetoId} />
+            </ComplianceStatusGate>
+          }
+        />
       </Routes>
     </ThemeProvider>
   );

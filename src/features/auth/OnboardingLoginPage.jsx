@@ -103,7 +103,7 @@ const OnboardingLoginPage = () => {
               )}
             </Field>
             <Field>
-              <Typography variant="small">sujetoId</Typography>
+              <Typography variant="small">Sociedad_ID</Typography>
               <input
                 type="text"
                 name="sujetoId"
