@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import { Provider } from "react-redux";
+import { MemoryRouter } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { configureStore } from "@reduxjs/toolkit";
 import { lightTheme } from "../../../assets/themes";
@@ -41,9 +42,11 @@ describe("OnboardingLoginPage", () => {
     const store = makeStore();
     render(
       <Provider store={store}>
-        <ThemeProvider theme={lightTheme}>
-          <OnboardingLoginPage />
-        </ThemeProvider>
+        <MemoryRouter initialEntries={["/?step=2&type=PJ"]}>
+          <ThemeProvider theme={lightTheme}>
+            <OnboardingLoginPage />
+          </ThemeProvider>
+        </MemoryRouter>
       </Provider>
     );
 

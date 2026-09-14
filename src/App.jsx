@@ -57,6 +57,7 @@ CvuWizardGate.propTypes = {
 
 const App = () => {
   const dispatch = useDispatch();
+  const [, setSearchParams] = useSearchParams();
   const token = useSelector((state) => state.auth.token);
   const sujetoId = useSelector((state) => state.auth.sujetoId);
 
@@ -84,7 +85,10 @@ const App = () => {
           role="secondary"
           size="small"
           type="button"
-          onClick={() => dispatch(loggedOut())}
+          onClick={() => {
+            dispatch(loggedOut());
+            setSearchParams({});
+          }}
         >
           Cerrar sesión
         </Button>

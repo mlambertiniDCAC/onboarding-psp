@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Typography } from "src/components/Typography";
@@ -49,6 +50,7 @@ const validationSchema = Yup.object().shape({
 
 const OnboardingLoginPage = () => {
   const dispatch = useDispatch();
+  const [, setSearchParams] = useSearchParams();
   const [apiError, setApiError] = useState(null);
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -62,6 +64,7 @@ const OnboardingLoginPage = () => {
       });
       dispatch(loginSuccess({ ...response.data, sujetoId: values.sujetoId }));
       dispatch(setDefaultSociety({ id: values.sujetoId }));
+      setSearchParams({});
     } catch (error) {
       setApiError(
         error.response?.data?.message || "No se pudo abrir la sesión."
