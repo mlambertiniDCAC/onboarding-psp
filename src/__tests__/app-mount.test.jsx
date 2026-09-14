@@ -22,41 +22,48 @@ vi.mock("../lib/axiosInstance", () => ({
 
 vi.mock("../lib/authStorage", () => ({
   authStorage: {
-    getToken: () => "test-token",
+    getToken: () => null,
+    getSujetoId: () => null,
     setToken: () => {},
+    setSujetoId: () => {},
     clear: () => {},
   },
 }));
 
-const makeStore = () =>
+const makeStore = (preloadedAuth) =>
   configureStore({
     reducer: {
       profile: profileReducer,
       cvuActivation: cvuActivationReducer,
       auth: authReducer,
     },
+    preloadedState: preloadedAuth ? { auth: preloadedAuth } : undefined,
     middleware: (g) => g({ serializableCheck: false }),
   });
 
-const renderAt = (initialEntries) =>
+const renderWith = (preloadedAuth) =>
   render(
-    <Provider store={makeStore()}>
-      <MemoryRouter initialEntries={initialEntries}>
+    <Provider store={makeStore(preloadedAuth)}>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>
     </Provider>
   );
 
 describe("App mount", () => {
-  it("asks for the sujetoId with no ref and no manual entry", async () => {
-    renderAt(["/"]);
-    expect(
-      await screen.findByText(/Ingresá el sujetoId de la sociedad/i)
-    ).toBeTruthy();
+  it("shows the login screen (mail + sujetoId) with no session", async () => {
+    renderWith(null);
+    expect(await screen.findByText(/^Mail$/i)).toBeTruthy();
+    expect(await screen.findByText(/^sujetoId$/i)).toBeTruthy();
   });
 
-  it("mounts the wizard intro when ?ref= is present", async () => {
-    renderAt(["/?ref=38513"]);
+  it("mounts the wizard intro with an active session", async () => {
+    renderWith({
+      token: "test-token",
+      sujetoId: "38513",
+      scope: "onboarding",
+      sujetos: [{ sujetoId: "38513", estado: "en_progreso" }],
+    });
     expect(await screen.findByText(/Activar mi cuenta CVU/i)).toBeTruthy();
   });
 });

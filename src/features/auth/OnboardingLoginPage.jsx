@@ -8,6 +8,9 @@ import { Button } from "src/components/Button";
 import axiosInstance from "src/lib/axiosInstance";
 import { loginSuccess } from "./authSlice";
 
+const OPERADOR_NOMBRE = "Operador";
+const OPERADOR_APELLIDO = "Interno";
+
 const Wrapper = styled.div`
   display: flex;
   min-height: 60vh;
@@ -23,12 +26,6 @@ const Card = styled.form`
   padding: 32px;
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
-`;
-
-const Field = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 
   input {
     height: 40px;
@@ -38,23 +35,34 @@ const Field = styled.div`
   }
 `;
 
+const Field = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
 const validationSchema = Yup.object().shape({
   mail: Yup.string().email("Mail inválido").required("Ingresá el mail"),
-  password: Yup.string().required("Ingresá la contraseña"),
+  sujetoId: Yup.string().required("Ingresá el sujetoId"),
 });
 
-const LoginPage = () => {
+const OnboardingLoginPage = () => {
   const dispatch = useDispatch();
   const [apiError, setApiError] = useState(null);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setApiError(null);
     try {
-      const response = await axiosInstance.post("/v1/auth/login", values);
-      dispatch(loginSuccess(response.data));
+      const response = await axiosInstance.post("/v1/auth/onboarding", {
+        mail: values.mail,
+        sujetoId: values.sujetoId,
+        nombre: OPERADOR_NOMBRE,
+        apellido: OPERADOR_APELLIDO,
+      });
+      dispatch(loginSuccess({ ...response.data, sujetoId: values.sujetoId }));
     } catch (error) {
       setApiError(
-        error.response?.data?.message || "No se pudo iniciar sesión."
+        error.response?.data?.message || "No se pudo abrir la sesión."
       );
     } finally {
       setSubmitting(false);
@@ -64,7 +72,7 @@ const LoginPage = () => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ mail: "", password: "" }}
+        initialValues={{ mail: "", sujetoId: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -95,17 +103,17 @@ const LoginPage = () => {
               )}
             </Field>
             <Field>
-              <Typography variant="small">Contraseña</Typography>
+              <Typography variant="small">sujetoId</Typography>
               <input
-                type="password"
-                name="password"
-                value={values.password}
+                type="text"
+                name="sujetoId"
+                value={values.sujetoId}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
-              {touched.password && errors.password && (
+              {touched.sujetoId && errors.sujetoId && (
                 <Typography variant="small" color="#c0392b">
-                  {errors.password}
+                  {errors.sujetoId}
                 </Typography>
               )}
             </Field>
@@ -129,4 +137,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default OnboardingLoginPage;

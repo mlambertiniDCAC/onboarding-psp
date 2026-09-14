@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { ThemeProvider } from "styled-components";
 import { lightTheme } from "./assets/themes";
 import { ensureFonts } from "./lib/ensureFonts";
 import { setDefaultSociety } from "./slices/profile/profileSlice";
-import { resolveRefExterna } from "./bootstrap/resolveRefExterna";
 import { loggedOut } from "./features/auth/authSlice";
-import LoginPage from "./features/auth/LoginPage";
-import SujetoIdForm from "./features/onboarding/SujetoIdForm";
+import OnboardingLoginPage from "./features/auth/OnboardingLoginPage";
 import { Button } from "./components/Button";
 import ActivateAccountCvu from "./features/activateAccountCvu/pages/ActivateAccountCvu";
 
@@ -20,34 +18,21 @@ const TopBar = styled.div`
 
 const App = () => {
   const dispatch = useDispatch();
-  const { search } = useLocation();
   const token = useSelector((state) => state.auth.token);
-  const [manualSujetoId, setManualSujetoId] = useState(null);
-
-  const { refExterna: refExternaFromUrl, razonSocial } = resolveRefExterna({
-    search,
-  });
-  const refExterna = manualSujetoId ?? refExternaFromUrl;
+  const sujetoId = useSelector((state) => state.auth.sujetoId);
 
   useEffect(() => {
     ensureFonts();
   }, []);
 
   useEffect(() => {
-    if (refExterna) {
-      dispatch(
-        setDefaultSociety({
-          id: refExterna,
-          razon_social: razonSocial ?? undefined,
-        })
-      );
-    }
-  }, [dispatch, refExterna, razonSocial]);
+    if (sujetoId) dispatch(setDefaultSociety({ id: sujetoId }));
+  }, [dispatch, sujetoId]);
 
-  if (!token) {
+  if (!token || !sujetoId) {
     return (
       <ThemeProvider theme={lightTheme}>
-        <LoginPage />
+        <OnboardingLoginPage />
       </ThemeProvider>
     );
   }
@@ -65,13 +50,9 @@ const App = () => {
           Cerrar sesión
         </Button>
       </TopBar>
-      {refExterna ? (
-        <Routes>
-          <Route path="*" element={<ActivateAccountCvu />} />
-        </Routes>
-      ) : (
-        <SujetoIdForm onSubmit={setManualSujetoId} />
-      )}
+      <Routes>
+        <Route path="*" element={<ActivateAccountCvu />} />
+      </Routes>
     </ThemeProvider>
   );
 };

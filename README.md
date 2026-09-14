@@ -13,15 +13,26 @@ El código de `src/features/activateAccountCvu/**` es una **copia verbatim** de
 
 ## Flujo
 
-1. Login propio contra `apigateway-psp`: `POST /v1/auth/login { mail, password }`
-   con una cuenta real del realm `psp`. El token queda en `localStorage` y se
-   renueva solo (`POST /v1/auth/refresh`) cuando expira.
-2. El operador carga manualmente el `sujetoId` de la sociedad a onboardear.
-3. Se monta el wizard (`activateAccountCvu`) sobre ese `sujetoId`.
+Una sola pantalla de entrada, sin password: `mail` + `sujetoId`. Al enviarla
+se llama a `POST /v1/auth/onboarding { mail, sujetoId, nombre, apellido }`
+contra `apigateway-psp`, que:
+
+- crea (o reutiliza) el usuario PSP en Keycloak para ese `mail`;
+- crea/resuelve el sujeto de compliance para ese `sujetoId` y arranca su
+  compliance si no existe;
+- devuelve una sesión (token opaco) **ligada a ese `sujetoId` puntual** —
+  el gateway rechaza (`403`) cualquier llamada a un `sujetoId` distinto del
+  que abrió la sesión.
+
+`nombre`/`apellido` van fijos (`"Operador" / "Interno"`) porque el mail no
+es el de la persona física que se está dando de alta, sino el del
+operador de producto usando la herramienta. El token y el `sujetoId`
+quedan en `localStorage` y se renuevan solos (`POST /v1/auth/refresh`)
+cuando expiran.
 
 No hay branching de roles/enrollment (Flujo 1-5 del artifact de Puerta B):
-el usuario de esta herramienta ya es una cuenta PSP real, no un cliente
-final en onboarding.
+esta pantalla reemplaza tanto el login como la selección de sujeto de un
+cliente final — acá el "usuario" es siempre el operador de producto.
 
 ## Correr standalone (dev)
 
@@ -34,10 +45,11 @@ npm run dev
 
 ## Rutas del apigateway-psp que consume
 
-`POST /v1/auth/login` · `POST /v1/auth/refresh` ·
+`POST /v1/auth/onboarding` · `POST /v1/auth/refresh` ·
 `GET /v1/compliance/:ref/drafts` · `GET /v1/compliance/steps` ·
 `POST /v1/compliance/:ref/draft` · `PUT /v1/compliance/:ref/draft`.
-`:ref` = sujetoId cargado a mano; el border lo traduce al `sujeto_verificado_id`.
+`:ref` = sujetoId cargado en la pantalla de entrada; el border lo traduce al
+`sujeto_verificado_id`.
 
 ## Deploy (Vercel + bridge local)
 
