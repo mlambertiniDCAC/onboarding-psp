@@ -32,6 +32,3 @@ package-lock.json
 
 # Temporary agent notes (local, not pushed to the repo)
 agent-temp-notes/
-
-bridge/.venv/
-bridge/__pycache__/

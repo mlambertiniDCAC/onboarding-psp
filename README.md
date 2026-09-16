@@ -39,6 +39,7 @@ cliente final — acá el "usuario" es siempre el operador de producto.
 ```bash
 npm install
 cp .env.example .env.development   # completar APIGW_PSP_URL
+# apigateway-psp local necesita CORS_ORIGINS=http://localhost:5175
 npm run dev
 # abrir http://localhost:5175/
 ```
@@ -51,25 +52,15 @@ npm run dev
 `:ref` = sujetoId cargado en la pantalla de entrada; el border lo traduce al
 `sujeto_verificado_id`.
 
-## Deploy (Vercel + bridge local)
+## Deploy (Vercel)
 
-`apigateway-psp` sólo es alcanzable por la VPN WireGuard de quien lo opera,
-así que el front (Vercel) no puede llamarlo directo. El puente es un
-reverse proxy local (`bridge/`) expuesto por un túnel:
+El front llama directo a la URL pública de `apigateway-psp`.
 
-```
-Vercel (onboarding-psp) → https://<túnel>.ngrok-free.app → bridge (local, :9000) → VPN → apigateway-psp
-```
-
-1. Con la VPN activa, levantar el bridge: ver `bridge/README.md`.
-2. Exponerlo con `ngrok http 9000` (o `cloudflared tunnel` para una URL
-   estable).
-3. En Vercel, setear `APIGW_PSP_URL` = la URL pública del túnel.
-4. Deploy (build-time: Vite hornea la variable en el bundle).
-
-El bridge no agrega autenticación propia — reenvía el `Authorization` tal
-cual. Es un entorno no productivo, expuesto solo mientras la VPN y el
-túnel están activos.
+1. En Vercel, setear `APIGW_PSP_URL` con la URL pública de `apigateway-psp`
+   (no se commitea en el repo).
+2. En `apigateway-psp`, agregar el dominio de Vercel a `CORS_ORIGINS`
+   (lista separada por comas); si no, el navegador bloquea las llamadas.
+3. Deploy (build-time: Vite hornea la variable en el bundle).
 
 ## Build de prod (contenedor, alternativa a Vercel)
 
