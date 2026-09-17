@@ -14,17 +14,14 @@ import {
 import {
   CVU_ACTIVATION_STEP,
   CVU_FORM_TYPE,
-  CVU_FLOW_TYPE_BY_PERSON,
 } from "../../../lib/constants";
 import { setStepData } from "../../../store/cvuActivation/cvuActivationSlice";
 import {
   fetchLegalConditionStep,
-  saveDraftStep,
   createDraft,
 } from "../../../store/cvuActivation/cvuActivationActions";
 import {
   selectStepData,
-  selectHasExistingDraft,
   selectLegalConditionOptions,
   selectIsFetchingLegalCondition,
   selectLegalConditionError,
@@ -48,7 +45,6 @@ export const ActivationStep0 = ({ onStepChange }) => {
   const defaultSociety = useSelector(selectDefaultSociety);
   const societyId = useSelector(selectDefaultSocietyId);
   const stepData = useSelector(selectStepData);
-  const hasExistingDraft = useSelector(selectHasExistingDraft);
   const legalConditionOptions = useSelector(selectLegalConditionOptions);
   const isFetching = useSelector(selectIsFetchingLegalCondition);
   const fetchError = useSelector(selectLegalConditionError);
@@ -78,17 +74,10 @@ export const ActivationStep0 = ({ onStepChange }) => {
     event.preventDefault();
     if (!legalCondition || isSubmitting) return;
     try {
-      // Si ya hay un registro en proceso (status con data) actualizamos con PUT;
-      // si no, creamos el draft con POST. El POST usa el flujo genérico ALTA_CVU;
-      // el PUT usa el flujo específico según la condición legal elegida (PF/PJ).
-      const persistDraft = hasExistingDraft ? saveDraftStep : createDraft;
-      const tipoFlujo = hasExistingDraft
-        ? CVU_FLOW_TYPE_BY_PERSON[legalCondition]
-        : CVU_FORM_TYPE;
       await dispatch(
-        persistDraft({
+        createDraft({
           societyId,
-          tipoFlujo,
+          tipoFlujo: CVU_FORM_TYPE,
           step: CVU_ACTIVATION_STEP.STEP_0,
           value: { condicion_legal: legalCondition },
         })

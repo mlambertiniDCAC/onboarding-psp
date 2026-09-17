@@ -133,12 +133,13 @@ export const fetchTermsStep = createAsyncThunk(
 // `step` es numérico (CVU_ACTIVATION_STEP) y el back lo espera como "step_N".
 const toStepKey = (step) => `step_${step}`;
 
-// Actualiza (PUT) un draft ya existente. El componente lo elige cuando el status
-// trajo un registro en proceso; para crearlo por primera vez usar `createDraft`.
+// Actualiza (PUT) un draft ya existente, del step_1 en adelante: el flujo va con
+// el subtipo concreto (ALTA_CVU_PF/PJ), que es como están registrados esos pasos
+// en el back. El step_0 no pasa por acá, usa `createDraft`.
 // OJO: el contrato del PUT difiere del POST → usa `flujo` y `data`.
 //
 // Acepta dos formas de payload según el paso:
-//   - JSON (pasos 0/1/final): se pasa `tipoFlujo`/`step`/`value` y se arma
+//   - JSON (pasos 1/final): se pasa `tipoFlujo`/`step`/`value` y se arma
 //     { flujo, step, data }. El paso final (T&C) manda `stepKey: "step_final"`
 //     para sobrescribir la key derivada de `step` (que daría "step_3").
 //   - multipart (paso 2, documentación): se pasa un `formData` ya armado (ver
@@ -167,10 +168,10 @@ export const saveDraftStep = createAsyncThunk(
   }
 );
 
-// Crea (POST) el draft por primera vez. El componente lo elige en el paso 0
-// cuando el status no trajo un registro en proceso; luego se actualiza con
-// `saveDraftStep` (PUT). OJO: el contrato del POST difiere del PUT → usa
-// `tipo_flujo` y `value`.
+// Crea (POST) o retoma el draft del paso 0. El paso 0 siempre va por acá con el
+// flujo genérico ALTA_CVU: es el único camino que vincula el compliance al draft.
+// Los pasos siguientes se guardan con `saveDraftStep` (PUT). OJO: el contrato del
+// POST difiere del PUT → usa `tipo_flujo` y `value`.
 export const createDraft = createAsyncThunk(
   "cvuActivation/createDraft",
   async ({ societyId, tipoFlujo, step, value }, { rejectWithValue }) => {
