@@ -1,8 +1,10 @@
+import { useState } from "react";
 import PropTypes from "prop-types";
 import styled, { useTheme } from "styled-components";
 import { CheckSVG, OutlineWalletSVG } from "assets/SVGLibrarie";
 import { Typography } from "components/Typography";
 import { Button } from "components/Button";
+import axiosInstance from "src/lib/axiosInstance";
 import { CVU_ACTIVATION_STEP, BENEFITS } from "../../lib/constants";
 
 const Card = styled.div`
@@ -73,11 +75,22 @@ const CheckWrapper = styled.div`
   margin-top: 1px;
 `;
 
-const CvuActivationIntro = ({ onStepChange }) => {
+const CvuActivationIntro = ({ sujetoId, onStepChange }) => {
   const theme = useTheme();
+  const [isActivating, setIsActivating] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleActivate = () => {
-    onStepChange(CVU_ACTIVATION_STEP.STEP_0);
+  const handleActivate = async () => {
+    setIsActivating(true);
+    setError(null);
+    try {
+      await axiosInstance.post(`/v1/compliance/${sujetoId}/iniciar`);
+      onStepChange(CVU_ACTIVATION_STEP.STEP_0);
+    } catch {
+      setError("No pudimos activar tu cuenta CVU. Probá de nuevo en unos minutos.");
+    } finally {
+      setIsActivating(false);
+    }
   };
 
   return (
@@ -125,15 +138,27 @@ const CvuActivationIntro = ({ onStepChange }) => {
         size="large"
         width="100%"
         onClick={handleActivate}
+        disabled={isActivating || !sujetoId}
       >
-        Activar mi cuenta CVU
+        {isActivating ? "Activando..." : "Activar mi cuenta CVU"}
       </Button>
+
+      {error && (
+        <Typography variant="small" color={theme.colors.red[500]}>
+          {error}
+        </Typography>
+      )}
     </Card>
   );
 };
 
 CvuActivationIntro.propTypes = {
+  sujetoId: PropTypes.string,
   onStepChange: PropTypes.func.isRequired,
+};
+
+CvuActivationIntro.defaultProps = {
+  sujetoId: undefined,
 };
 
 export default CvuActivationIntro;

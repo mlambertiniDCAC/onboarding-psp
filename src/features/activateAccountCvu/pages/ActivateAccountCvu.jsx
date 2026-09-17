@@ -76,6 +76,7 @@ const ActivateAccountCvu = () => {
     <ActivateAccountCvuLayout
       currentStep={currentStep}
       personType={personType}
+      sujetoId={societyId}
       onStepChange={goToStep}
       isLoading={isFetchingStatus}
     />
