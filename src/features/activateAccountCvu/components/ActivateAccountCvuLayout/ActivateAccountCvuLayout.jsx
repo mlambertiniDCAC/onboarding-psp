@@ -35,6 +35,7 @@ const Content = styled.div`
 const ActivateAccountCvuLayout = ({
   currentStep,
   personType,
+  sujetoId,
   onStepChange,
 }) => {
   const renderStep = () => {
@@ -73,7 +74,7 @@ const ActivateAccountCvuLayout = ({
           />
         )}
         {currentStep === null ? (
-          <CvuActivationIntro onStepChange={onStepChange} />
+          <CvuActivationIntro sujetoId={sujetoId} onStepChange={onStepChange} />
         ) : (
           renderStep()
         )}
@@ -85,6 +86,7 @@ const ActivateAccountCvuLayout = ({
 ActivateAccountCvuLayout.propTypes = {
   currentStep: PropTypes.number,
   personType: PropTypes.oneOf(Object.values(PERSON_TYPE)),
+  sujetoId: PropTypes.string,
   onStepChange: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
 };
@@ -92,6 +94,7 @@ ActivateAccountCvuLayout.propTypes = {
 ActivateAccountCvuLayout.defaultProps = {
   currentStep: null,
   personType: PERSON_TYPE.PERSONA_FISICA,
+  sujetoId: undefined,
 };
 
 export default ActivateAccountCvuLayout;
