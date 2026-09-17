@@ -17,6 +17,8 @@ import {
 
 const axiosInstance = await getAxiosInstance();
 
+const DRAFT_NOT_FOUND_STATUS = 404;
+
 export const fetchCvuActivationStatus = createAsyncThunk(
   "cvuActivation/fetchStatus",
   async (societyId, { rejectWithValue }) => {
@@ -29,7 +31,10 @@ export const fetchCvuActivationStatus = createAsyncThunk(
       );
       return adaptRegistrationStatus(response.data);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      if (error.response?.status === DRAFT_NOT_FOUND_STATUS) {
+        return adaptRegistrationStatus(null);
+      }
+      return rejectWithValue(adaptErrors(error.response?.data));
     }
   }
 );
