@@ -12,6 +12,8 @@ import { loginSuccess } from "./authSlice";
 
 const OPERADOR_NOMBRE = "Operador";
 const OPERADOR_APELLIDO = "Interno";
+export const MENSAJE_REGISTRO_NO_HABILITADO =
+  "Este mail no puede usarse para abrir una cuenta desde acá.";
 
 const Wrapper = styled.div`
   display: flex;
@@ -66,6 +68,10 @@ const OnboardingLoginPage = () => {
       dispatch(setDefaultSociety({ id: values.sujetoId }));
       setSearchParams({});
     } catch (error) {
+      if (error.response?.status === 403) {
+        setApiError(MENSAJE_REGISTRO_NO_HABILITADO);
+        return;
+      }
       setApiError(
         error.response?.data?.message || "No se pudo abrir la sesión."
       );
