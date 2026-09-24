@@ -230,6 +230,9 @@ export const capitalizeAndReplaceUnderscore = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, " ");
 };
 
+export const apiErrorBody = (error) =>
+  error?.response?.data?.error ?? error?.response?.data;
+
 export const adaptErrors = (errorData, messageFlag = false) => {
   const { errors, message } = errorData || {};
   if (errors && !messageFlag) {

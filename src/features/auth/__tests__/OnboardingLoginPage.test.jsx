@@ -137,4 +137,31 @@ describe("OnboardingLoginPage", () => {
 
     expect(await screen.findByText("falta sujetoId")).toBeTruthy();
   });
+
+  it("muestra el mensaje del gateway con el formato de error del perímetro", async () => {
+    post.mockImplementationOnce(() =>
+      Promise.reject({
+        response: {
+          status: 400,
+          data: { error: { code: 400, message: "falta sujetoId" } },
+        },
+      })
+    );
+    renderPage(makeStore());
+
+    enviar("op@psp.local", "555555");
+
+    expect(await screen.findByText("falta sujetoId")).toBeTruthy();
+  });
+
+  it("muestra el texto por defecto cuando no hay respuesta", async () => {
+    post.mockImplementationOnce(() =>
+      Promise.reject(new Error("Network Error"))
+    );
+    renderPage(makeStore());
+
+    enviar("op@psp.local", "555555");
+
+    expect(await screen.findByText("No se pudo abrir la sesión.")).toBeTruthy();
+  });
 });
