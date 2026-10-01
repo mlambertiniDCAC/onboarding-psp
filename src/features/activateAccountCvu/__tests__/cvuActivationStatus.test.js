@@ -97,4 +97,81 @@ describe("fetchCvuActivationStatus", () => {
     });
     expect(state.stepData.step0).toEqual({ legalCondition: "PF" });
   });
+  it("pide el draft a la ruta de onboarding con el form_type", async () => {
+    axiosInstance.get.mockResolvedValueOnce({ data: { data: { id: 1 } } });
+    const store = makeStore();
+
+    await store.dispatch(fetchCvuActivationStatus("7"));
+
+    expect(axiosInstance.get).toHaveBeenCalledWith(
+      "/v1/onboarding/compliance/7/drafts",
+      { params: { form_type: "ALTA_CVU" } }
+    );
+  });
+
+  it("rehidrata los documentos del step_2 con url y nombre", async () => {
+    axiosInstance.get.mockResolvedValueOnce({
+      data: {
+        data: {
+          id: 12,
+          status: "EN_PROGRESO",
+          completed_steps: ["step_0", "step_1"],
+          form_values: {
+            step_2: {
+              estatuto_social: {
+                documento: [
+                  {
+                    url: "https://s3/x/3f2a.pdf?sig",
+                    nombre: "Estatuto año 2024.pdf",
+                  },
+                ],
+              },
+              acta_asamblea: { omitido: true, motivo: "no aplica" },
+            },
+          },
+        },
+      },
+    });
+    const store = makeStore();
+
+    await store.dispatch(fetchCvuActivationStatus("7"));
+
+    expect(store.getState().cvuActivation.stepData.step2.documents).toEqual({
+      estatuto_social: {
+        files: [
+          { url: "https://s3/x/3f2a.pdf?sig", name: "Estatuto año 2024.pdf" },
+        ],
+        skipped: false,
+        skipReason: "",
+      },
+      acta_asamblea: { files: [], skipped: true, skipReason: "no aplica" },
+    });
+  });
+
+  it("un documento sin url queda con url null y su nombre", async () => {
+    axiosInstance.get.mockResolvedValueOnce({
+      data: {
+        data: {
+          id: 12,
+          status: "EN_PROGRESO",
+          completed_steps: ["step_0", "step_1"],
+          form_values: {
+            step_2: {
+              estatuto_social: {
+                documento: [{ url: null, nombre: "estatuto_social" }],
+              },
+            },
+          },
+        },
+      },
+    });
+    const store = makeStore();
+
+    await store.dispatch(fetchCvuActivationStatus("7"));
+
+    expect(
+      store.getState().cvuActivation.stepData.step2.documents.estatuto_social
+        .files
+    ).toEqual([{ url: null, name: "estatuto_social" }]);
+  });
 });

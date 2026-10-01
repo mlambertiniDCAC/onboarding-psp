@@ -32,7 +32,7 @@ const ComplianceStatusGate = ({ sujetoId, children }) => {
     let cancelled = false;
     setError(null);
     axiosInstance
-      .get(`/v1/compliance/${sujetoId}/estado`)
+      .get(`/v1/onboarding/compliance/${sujetoId}/estado`)
       .then((response) => {
         if (!cancelled) setEstado(response.data?.estado ?? null);
       })

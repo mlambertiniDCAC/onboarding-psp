@@ -8,13 +8,19 @@ import ComplianceStatusGate from "../ComplianceStatusGate";
 afterEach(cleanup);
 
 vi.mock("src/lib/axiosInstance", () => {
-  const state = { estado: "en_progreso" };
+  const state = { estado: "en_progreso", urls: [] };
   return {
     __setEstado: (e) => {
       state.estado = e;
     },
+    __urls: () => state.urls,
     default: {
-      get: () => Promise.resolve({ data: { sujetoId: "1", estado: state.estado } }),
+      get: (url) => {
+        state.urls.push(url);
+        return Promise.resolve({
+          data: { sujetoId: "1", estado: state.estado },
+        });
+      },
     },
   };
 });
@@ -51,6 +57,18 @@ describe("ComplianceStatusGate", () => {
     await renderGate("777001");
 
     expect(await screen.findByText(/contenido del wizard/i)).toBeTruthy();
+  });
+
+  it("consulta el estado en la ruta de onboarding", async () => {
+    const axiosInstance = await import("src/lib/axiosInstance");
+    axiosInstance.__setEstado("en_progreso");
+
+    await renderGate("555001");
+
+    expect(await screen.findByText(/contenido del wizard/i)).toBeTruthy();
+    expect(axiosInstance.__urls()).toContain(
+      "/v1/onboarding/compliance/555001/estado"
+    );
   });
 
   it("deja pasar al wizard cuando el estado es sin_solicitud", async () => {

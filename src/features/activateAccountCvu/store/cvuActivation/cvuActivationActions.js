@@ -18,13 +18,15 @@ import {
 const axiosInstance = await getAxiosInstance();
 
 const DRAFT_NOT_FOUND_STATUS = 404;
+const ONBOARDING_COMPLIANCE_URL = "/v1/onboarding/compliance";
+const ONBOARDING_STEPS_URL = `${ONBOARDING_COMPLIANCE_URL}/steps`;
 
 export const fetchCvuActivationStatus = createAsyncThunk(
   "cvuActivation/fetchStatus",
   async (societyId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(
-        `/v1/compliance/${societyId}/drafts`,
+        `${ONBOARDING_COMPLIANCE_URL}/${societyId}/drafts`,
         {
           params: { form_type: CVU_FORM_TYPE },
         }
@@ -43,7 +45,7 @@ export const fetchLegalConditionStep = createAsyncThunk(
   "cvuActivation/fetchLegalConditionStep",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/v1/compliance/steps", {
+      const response = await axiosInstance.get(ONBOARDING_STEPS_URL, {
         params: {
           flujo: "alta_cvu",
           step: CVU_ACTIVATION_STEP.STEP_0,
@@ -60,7 +62,7 @@ export const fetchSocietyTypeStep = createAsyncThunk(
   "cvuActivation/fetchSocietyTypeStep",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/v1/compliance/steps", {
+      const response = await axiosInstance.get(ONBOARDING_STEPS_URL, {
         params: {
           flujo: "alta_cvu_pj",
           step: CVU_ACTIVATION_STEP.STEP_1,
@@ -80,7 +82,7 @@ export const fetchDocumentationStep = createAsyncThunk(
   "cvuActivation/fetchDocumentationStep",
   async (societyType, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/v1/compliance/steps", {
+      const response = await axiosInstance.get(ONBOARDING_STEPS_URL, {
         params: {
           flujo: "alta_cvu_pj",
           step: CVU_ACTIVATION_STEP.STEP_2,
@@ -98,7 +100,7 @@ export const fetchPersonalInfoStep = createAsyncThunk(
   "cvuActivation/fetchPersonalInfoStep",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/v1/compliance/steps", {
+      const response = await axiosInstance.get(ONBOARDING_STEPS_URL, {
         params: {
           flujo: "alta_cvu_pf",
           step: CVU_ACTIVATION_STEP.STEP_1,
@@ -117,7 +119,7 @@ export const fetchTermsStep = createAsyncThunk(
   "cvuActivation/fetchTermsStep",
   async (personType, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("/v1/compliance/steps", {
+      const response = await axiosInstance.get(ONBOARDING_STEPS_URL, {
         params: {
           flujo: CVU_FLOW_PARAM_BY_PERSON[personType],
           step: CVU_ACTIVATION_STEP.STEP_3,
@@ -158,7 +160,7 @@ export const saveDraftStep = createAsyncThunk(
         data: value,
       };
       const response = await axiosInstance.put(
-        `/v1/compliance/${societyId}/draft`,
+        `${ONBOARDING_COMPLIANCE_URL}/${societyId}/draft`,
         payload
       );
       return response.data;
@@ -177,7 +179,7 @@ export const createDraft = createAsyncThunk(
   async ({ societyId, tipoFlujo, step, value }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
-        `/v1/compliance/${societyId}/draft`,
+        `${ONBOARDING_COMPLIANCE_URL}/${societyId}/draft`,
         {
           tipo_flujo: tipoFlujo,
           step: toStepKey(step),

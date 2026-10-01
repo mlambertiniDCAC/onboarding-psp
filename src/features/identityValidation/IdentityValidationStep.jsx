@@ -47,7 +47,9 @@ const IdentityValidationStep = ({ sujetoId, onDone, onPrevious }) => {
     setIsLoading(true);
     setError(null);
     axiosInstance
-      .post(`/v1/compliance/${sujetoId}/validacion-identidad/iniciar`)
+      .post(
+        `/v1/onboarding/compliance/${sujetoId}/validacion-identidad/iniciar`
+      )
       .then((response) => {
         if (!cancelled) setValidation(response.data?.data ?? null);
       })

@@ -84,7 +84,7 @@ const CvuActivationIntro = ({ sujetoId, onStepChange }) => {
     setIsActivating(true);
     setError(null);
     try {
-      await axiosInstance.post(`/v1/compliance/${sujetoId}/iniciar`);
+      await axiosInstance.post(`/v1/onboarding/compliance/${sujetoId}/iniciar`);
       onStepChange(CVU_ACTIVATION_STEP.STEP_0);
     } catch {
       setError("No pudimos activar tu cuenta CVU. Probá de nuevo en unos minutos.");

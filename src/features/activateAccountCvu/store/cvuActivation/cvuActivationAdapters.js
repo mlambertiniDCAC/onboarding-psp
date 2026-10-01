@@ -70,7 +70,7 @@ const adaptFormValuesToStepData = (formValues = {}) => {
   return stepData;
 };
 
-// Respuesta de GET /v1/compliance/:id/drafts?form_type=ALTA_CVU:
+// Respuesta de GET /v1/onboarding/compliance/:id/drafts?form_type=ALTA_CVU:
 // { success, data: { status, completed_steps, form_values, ... } }
 export const adaptRegistrationStatus = (response) => {
   const data = response?.data ?? {};

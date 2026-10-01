@@ -26,7 +26,7 @@ export const CVU_FLOW_TYPE_BY_PERSON = {
   [PERSON_TYPE.PERSONA_JURIDICA]: CVU_FLOW_TYPE.PJ,
 };
 
-// `flujo` del query param del GET /v1/compliance/steps (en minúscula, distinto
+// `flujo` del query param del GET /v1/onboarding/compliance/steps (en minúscula, distinto
 // del `flujo` del body que va en mayúscula — ver CVU_FLOW_TYPE_BY_PERSON).
 export const CVU_FLOW_PARAM_BY_PERSON = {
   [PERSON_TYPE.PERSONA_FISICA]: "alta_cvu_pf",

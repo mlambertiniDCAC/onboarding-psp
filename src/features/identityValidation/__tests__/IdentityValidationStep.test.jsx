@@ -12,6 +12,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { lightTheme } from "../../../assets/themes";
 import cvuActivationReducer from "../../activateAccountCvu/store/cvuActivation/cvuActivationSlice";
 import IdentityValidationStep from "../IdentityValidationStep";
+import axiosInstance from "src/lib/axiosInstance";
 
 vi.mock("src/lib/axiosInstance", () => {
   const mockAxios = {
@@ -60,6 +61,26 @@ describe("IdentityValidationStep", () => {
     expect(
       await screen.findByText(/entorno de prueba/i)
     ).toBeTruthy();
+  });
+
+  it("inicia la validación en la ruta de onboarding", async () => {
+    render(
+      <Provider store={makeStore()}>
+        <ThemeProvider theme={lightTheme}>
+          <IdentityValidationStep
+            sujetoId="38513"
+            onDone={vi.fn()}
+            onPrevious={vi.fn()}
+          />
+        </ThemeProvider>
+      </Provider>
+    );
+
+    await waitFor(() =>
+      expect(axiosInstance.post).toHaveBeenCalledWith(
+        "/v1/onboarding/compliance/38513/validacion-identidad/iniciar"
+      )
+    );
   });
 
   it("llama a onDone al confirmar en modo mock", async () => {
