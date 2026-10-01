@@ -36,6 +36,7 @@ const { ActivationStep0 } = await import(
 );
 
 const SOCIETY_ID = 333333;
+const DRAFT_URL = `/v1/onboarding/compliance/${SOCIETY_ID}/draft`;
 
 const LEGAL_CONDITION_RESPONSE = {
   data: {
@@ -98,7 +99,7 @@ describe("ActivationStep0", () => {
     await elegirYContinuar("Persona Humana");
 
     await waitFor(() =>
-      expect(post).toHaveBeenCalledWith(`/v1/compliance/${SOCIETY_ID}/draft`, {
+      expect(post).toHaveBeenCalledWith(DRAFT_URL, {
         tipo_flujo: "ALTA_CVU",
         step: "step_0",
         value: { condicion_legal: "PF" },
@@ -116,7 +117,7 @@ describe("ActivationStep0", () => {
     await elegirYContinuar("Persona Humana");
 
     await waitFor(() =>
-      expect(post).toHaveBeenCalledWith(`/v1/compliance/${SOCIETY_ID}/draft`, {
+      expect(post).toHaveBeenCalledWith(DRAFT_URL, {
         tipo_flujo: "ALTA_CVU",
         step: "step_0",
         value: { condicion_legal: "PF" },
@@ -135,7 +136,7 @@ describe("ActivationStep0", () => {
     await elegirYContinuar("Persona Jurídica");
 
     await waitFor(() =>
-      expect(post).toHaveBeenCalledWith(`/v1/compliance/${SOCIETY_ID}/draft`, {
+      expect(post).toHaveBeenCalledWith(DRAFT_URL, {
         tipo_flujo: "ALTA_CVU",
         step: "step_0",
         value: { condicion_legal: "PJ" },

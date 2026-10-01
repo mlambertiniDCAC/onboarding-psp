@@ -33,7 +33,9 @@ describe("CvuActivationIntro", () => {
     await waitFor(() =>
       expect(onStepChange).toHaveBeenCalledWith(CVU_ACTIVATION_STEP.STEP_0)
     );
-    expect(post).toHaveBeenCalledWith("/v1/compliance/923326/iniciar");
+    expect(post).toHaveBeenCalledWith(
+      "/v1/onboarding/compliance/923326/iniciar"
+    );
   });
 
   it("no avanza y muestra el error cuando la activación falla", async () => {
