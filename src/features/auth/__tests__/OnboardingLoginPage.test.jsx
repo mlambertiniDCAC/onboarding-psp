@@ -17,7 +17,7 @@ afterEach(cleanup);
 const { post } = vi.hoisted(() => ({
   post: vi.fn(() =>
     Promise.resolve({
-      data: { token: "tkn", scope: "onboarding", sujetos: [] },
+      data: { token: "tkn" },
     })
   ),
 }));
@@ -76,18 +76,9 @@ describe("OnboardingLoginPage", () => {
     expect(selectDefaultSocietyId(store.getState())).toBe("555555");
   });
 
-  it("guarda todas las sociedades que devuelve el registro y opera sobre la ingresada", async () => {
+  it("opera sobre la sociedad ingresada con la respuesta { token }", async () => {
     post.mockImplementationOnce(() =>
-      Promise.resolve({
-        data: {
-          token: "tkn-2",
-          scope: "onboarding",
-          sujetos: [
-            { sujetoId: "111111", estado: "aceptado" },
-            { sujetoId: "222222", estado: "sin_solicitud" },
-          ],
-        },
-      })
+      Promise.resolve({ data: { token: "tkn-2" } })
     );
     const store = makeStore();
     renderPage(store);
@@ -95,8 +86,6 @@ describe("OnboardingLoginPage", () => {
     enviar("cliente@psp.local", "222222");
 
     await waitFor(() => expect(store.getState().auth.token).toBe("tkn-2"));
-    expect(store.getState().auth.scope).toBe("onboarding");
-    expect(store.getState().auth.sujetos).toHaveLength(2);
     expect(store.getState().auth.sujetoId).toBe("222222");
     expect(selectDefaultSocietyId(store.getState())).toBe("222222");
   });

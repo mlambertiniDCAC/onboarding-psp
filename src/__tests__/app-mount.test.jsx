@@ -61,8 +61,6 @@ describe("App mount", () => {
     renderWith({
       token: "test-token",
       sujetoId: "38513",
-      scope: "onboarding",
-      sujetos: [{ sujetoId: "38513", estado: "en_progreso" }],
     });
     expect(await screen.findByText(/Activar mi cuenta CVU/i)).toBeTruthy();
   });

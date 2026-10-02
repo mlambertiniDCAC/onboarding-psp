@@ -30,7 +30,7 @@ vi.mock("../lib/axiosInstance", () => ({
     },
     post: async () =>
       Promise.resolve({
-        data: { token: "tkn", scope: "onboarding", sujetos: [] },
+        data: { token: "tkn" },
       }),
   },
 }));

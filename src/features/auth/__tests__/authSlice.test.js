@@ -24,7 +24,7 @@ describe("authSlice", () => {
     expect(state.sujetoId).toBeNull();
   });
 
-  it("loginSuccess stores the token/sujetoId and fills scope/sujetos", () => {
+  it("loginSuccess stores only the token and sujetoId", () => {
     const state = authReducer(
       undefined,
       loginSuccess({
@@ -36,8 +36,8 @@ describe("authSlice", () => {
     );
     expect(state.token).toBe("tkn");
     expect(state.sujetoId).toBe("1");
-    expect(state.scope).toBe("onboarding");
-    expect(state.sujetos).toEqual([{ sujetoId: "1", estado: "en_progreso" }]);
+    expect(state).not.toHaveProperty("scope");
+    expect(state).not.toHaveProperty("sujetos");
     expect(authStorage.setToken).toHaveBeenCalledWith("tkn");
     expect(authStorage.setSujetoId).toHaveBeenCalledWith("1");
   });
