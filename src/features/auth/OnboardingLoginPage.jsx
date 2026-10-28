@@ -8,6 +8,7 @@ import { Typography } from "src/components/Typography";
 import { Button } from "src/components/Button";
 import axiosInstance from "src/lib/axiosInstance";
 import { setDefaultSociety } from "src/slices/profile/profileSlice";
+import { apiErrorBody } from "src/lib/helpers";
 import { loginSuccess } from "./authSlice";
 
 const OPERADOR_NOMBRE = "Operador";
@@ -73,7 +74,7 @@ const OnboardingLoginPage = () => {
         return;
       }
       setApiError(
-        error.response?.data?.message || "No se pudo abrir la sesión."
+        apiErrorBody(error)?.message || "No se pudo abrir la sesión."
       );
     } finally {
       setSubmitting(false);

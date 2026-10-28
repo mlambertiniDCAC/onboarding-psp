@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getAxiosInstance } from "src/lib/axiosInstance";
-import { adaptErrors } from "src/lib/helpers";
+import { adaptErrors, apiErrorBody } from "src/lib/helpers";
 import {
   CVU_ACTIVATION_STEP,
   CVU_FORM_TYPE,
@@ -36,7 +36,7 @@ export const fetchCvuActivationStatus = createAsyncThunk(
       if (error.response?.status === DRAFT_NOT_FOUND_STATUS) {
         return adaptRegistrationStatus(null);
       }
-      return rejectWithValue(adaptErrors(error.response?.data));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -53,7 +53,7 @@ export const fetchLegalConditionStep = createAsyncThunk(
       });
       return adaptLegalConditionOptions(response.data);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -70,7 +70,7 @@ export const fetchSocietyTypeStep = createAsyncThunk(
       });
       return adaptSocietyTypeOptions(response.data);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -91,7 +91,7 @@ export const fetchDocumentationStep = createAsyncThunk(
       });
       return adaptDocumentationOptions(response.data, societyType);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -108,7 +108,7 @@ export const fetchPersonalInfoStep = createAsyncThunk(
       });
       return adaptOccupationOptions(response.data);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -127,7 +127,7 @@ export const fetchTermsStep = createAsyncThunk(
       });
       return adaptTermsOptions(response.data);
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -165,7 +165,7 @@ export const saveDraftStep = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
@@ -188,7 +188,7 @@ export const createDraft = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(adaptErrors(error.response?.data?.error));
+      return rejectWithValue(adaptErrors(apiErrorBody(error)));
     }
   }
 );
