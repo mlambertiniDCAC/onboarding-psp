@@ -24,7 +24,7 @@ describe("axiosInstance", () => {
   });
 
   it("serializa los objetos como JSON", async () => {
-    const payload = { flujo: "ALTA_CVU_PJ", step: "step_1", data: { tipo_societario: "SH" } };
+    const payload = { flujo: "ALTA_CVU_PJ", step: "step_1", data: { tipo_societario: "SOCH" } };
 
     const { config } = await axiosInstance.put("/v1/compliance/1/draft", payload, {
       adapter: captureAdapter,
