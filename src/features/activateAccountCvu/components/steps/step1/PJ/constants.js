@@ -1,7 +1,7 @@
 export const SOCIETY_TYPE = {
   SA: "SA",
   SRL: "SRL",
-  SH: "SH",
+  SOCH: "SOCH",
   SUCESION: "SUCESION",
 };
 
@@ -12,7 +12,7 @@ export const SOCIETY_TYPE = {
 export const SOCIETY_TYPE_DETAILS = {
   [SOCIETY_TYPE.SA]: { label: "Sociedad Anónima (SA)" },
   [SOCIETY_TYPE.SRL]: { label: "Sociedad de Responsabilidad Limitada (SRL)" },
-  [SOCIETY_TYPE.SH]: { label: "Sociedad de Hecho (SH)" },
+  [SOCIETY_TYPE.SOCH]: { label: "Sociedad de Hecho (SH)" },
   [SOCIETY_TYPE.SUCESION]: { label: "Sucesión" },
 };
 
