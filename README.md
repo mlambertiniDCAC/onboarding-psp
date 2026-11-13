@@ -52,6 +52,31 @@ npm run dev
 `:ref` = sujetoId cargado en la pantalla de entrada; el border lo traduce al
 `sujeto_verificado_id`.
 
+Validación de identidad (step 2 de PF): `POST /v1/identidad/validar` ·
+`GET /v1/identidad/me`.
+
+## Validación de identidad (4i)
+
+El step 2 del flujo PF arranca la validación contra `POST /v1/identidad/validar`
+y **navega** (`window.location.assign`) a la `url_4i` que devuelve el gateway:
+4i rechaza el iframe y el usuario se va de la aplicación. No hay botón de "ya
+completé la validación": el estado lo fija el backend cuando 4i vuelve.
+
+Quién se valida es **el usuario de la sesión** — el `sub` del token opaco. El
+front no manda ningún identificador de sujeto y el gateway no acepta ninguno.
+
+Al terminar, 4i redirige a la ruta pública del gateway
+(`GET /v1/identidad/validaciones/retorno`, que el front nunca llama) y esa ruta
+rebota al front con `?resultado=…` y, cuando hubo corte, `&step=…`. El front lee
+el resultado, lo traduce a un mensaje, limpia esos parámetros de la URL y vuelve
+a consultar `GET /v1/identidad/me`. El retorno cae en el dispositivo que abrió la
+URL de 4i: si se arrancó en la computadora y se validó por QR con el celular,
+vuelve a la computadora.
+
+Para que ese rebote caiga en el front hay que setear `IDENTIDAD_FRONT_RETORNO_URL`
+en `apigateway-psp` apuntando a la URL pública de este front (el gateway le agrega
+`resultado` y `step` a esa URL).
+
 ## Deploy (Vercel)
 
 El front llama directo a la URL pública de `apigateway-psp`.
