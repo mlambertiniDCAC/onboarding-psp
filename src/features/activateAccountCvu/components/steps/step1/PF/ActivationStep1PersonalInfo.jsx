@@ -123,7 +123,7 @@ export const ActivationStep1PersonalInfo = ({ onStepChange }) => {
         })
       ).unwrap();
       persistStepData(values);
-      onStepChange(CVU_ACTIVATION_STEP.STEP_3);
+      onStepChange(CVU_ACTIVATION_STEP.STEP_2);
     } catch {
       // El error se refleja vía submitError en el store.
     }

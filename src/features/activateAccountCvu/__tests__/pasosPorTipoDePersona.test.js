@@ -3,88 +3,77 @@ import {
   CVU_ACTIVATION_STEP,
   PERSON_TYPE,
   cvuActivationStepsByType,
-  pasoAlcanzable,
+  etiquetaDelPaso2,
   tieneDocumentacion,
+  validaIdentidadEnElWizard,
 } from "../lib/constants";
 
-const idsDe = (type) => cvuActivationStepsByType(type).map((paso) => paso.id);
+const pasosDe = (type) => cvuActivationStepsByType(type);
+const idsDe = (type) => pasosDe(type).map((paso) => paso.id);
+const etiquetaDe = (type, id) =>
+  pasosDe(type).find((paso) => paso.id === id).label;
 
-describe("tieneDocumentacion", () => {
-  it("solo la persona juridica tiene paso de documentacion", () => {
+describe("quien carga documentacion y quien valida identidad", () => {
+  it("la documentacion es solo de la persona juridica", () => {
     expect(tieneDocumentacion(PERSON_TYPE.PERSONA_JURIDICA)).toBe(true);
     expect(tieneDocumentacion(PERSON_TYPE.PERSONA_FISICA)).toBe(false);
+  });
+
+  it("la identidad se valida dentro del wizard solo para la persona fisica", () => {
+    expect(validaIdentidadEnElWizard(PERSON_TYPE.PERSONA_FISICA)).toBe(true);
+    expect(validaIdentidadEnElWizard(PERSON_TYPE.PERSONA_JURIDICA)).toBe(false);
+  });
+
+  it("son excluyentes: el paso 2 es una cosa o la otra", () => {
+    for (const type of Object.values(PERSON_TYPE)) {
+      expect(tieneDocumentacion(type)).not.toBe(
+        validaIdentidadEnElWizard(type)
+      );
+    }
   });
 });
 
 describe("cvuActivationStepsByType", () => {
-  it("la persona fisica no ve el paso de documentacion", () => {
-    expect(idsDe(PERSON_TYPE.PERSONA_FISICA)).toEqual([
-      CVU_ACTIVATION_STEP.STEP_0,
-      CVU_ACTIVATION_STEP.STEP_1,
-      CVU_ACTIVATION_STEP.STEP_3,
-    ]);
-  });
-
-  it("la persona juridica lo ve", () => {
-    expect(idsDe(PERSON_TYPE.PERSONA_JURIDICA)).toEqual([
+  it("los dos tipos recorren los mismos cuatro pasos", () => {
+    const esperado = [
       CVU_ACTIVATION_STEP.STEP_0,
       CVU_ACTIVATION_STEP.STEP_1,
       CVU_ACTIVATION_STEP.STEP_2,
       CVU_ACTIVATION_STEP.STEP_3,
-    ]);
+    ];
+
+    expect(idsDe(PERSON_TYPE.PERSONA_FISICA)).toEqual(esperado);
+    expect(idsDe(PERSON_TYPE.PERSONA_JURIDICA)).toEqual(esperado);
+  });
+
+  it("el paso 2 se llama distinto segun el tipo", () => {
+    expect(
+      etiquetaDe(PERSON_TYPE.PERSONA_FISICA, CVU_ACTIVATION_STEP.STEP_2)
+    ).toBe("Validación de identidad");
+    expect(
+      etiquetaDe(PERSON_TYPE.PERSONA_JURIDICA, CVU_ACTIVATION_STEP.STEP_2)
+    ).toBe("Documentación");
+  });
+
+  it("el paso 1 tambien", () => {
+    expect(
+      etiquetaDe(PERSON_TYPE.PERSONA_FISICA, CVU_ACTIVATION_STEP.STEP_1)
+    ).toBe("Información personal");
+    expect(
+      etiquetaDe(PERSON_TYPE.PERSONA_JURIDICA, CVU_ACTIVATION_STEP.STEP_1)
+    ).toBe("Tipo de sociedad");
   });
 
   it("sin tipo se comporta como persona fisica", () => {
-    expect(idsDe(undefined)).not.toContain(CVU_ACTIVATION_STEP.STEP_2);
+    expect(etiquetaDelPaso2(undefined)).toBe("Validación de identidad");
+    expect(idsDe(undefined)).toEqual(idsDe(PERSON_TYPE.PERSONA_FISICA));
   });
 
-  it("el paso 1 cambia de nombre segun el tipo", () => {
-    const etiqueta = (type) =>
-      cvuActivationStepsByType(type).find(
-        (paso) => paso.id === CVU_ACTIVATION_STEP.STEP_1
-      ).label;
-
-    expect(etiqueta(PERSON_TYPE.PERSONA_FISICA)).toBe("Información personal");
-    expect(etiqueta(PERSON_TYPE.PERSONA_JURIDICA)).toBe("Tipo de sociedad");
-  });
-});
-
-describe("pasoAlcanzable", () => {
-  it("a una persona fisica el paso 2 la manda a terminos y condiciones", () => {
-    expect(
-      pasoAlcanzable(CVU_ACTIVATION_STEP.STEP_2, PERSON_TYPE.PERSONA_FISICA)
-    ).toBe(CVU_ACTIVATION_STEP.STEP_3);
-  });
-
-  it("a una persona juridica el paso 2 la deja donde estaba", () => {
-    expect(
-      pasoAlcanzable(CVU_ACTIVATION_STEP.STEP_2, PERSON_TYPE.PERSONA_JURIDICA)
-    ).toBe(CVU_ACTIVATION_STEP.STEP_2);
-  });
-
-  it("no toca ningun otro paso", () => {
-    for (const type of [
-      PERSON_TYPE.PERSONA_FISICA,
-      PERSON_TYPE.PERSONA_JURIDICA,
-    ]) {
-      for (const paso of [
-        CVU_ACTIVATION_STEP.STEP_0,
-        CVU_ACTIVATION_STEP.STEP_1,
-        CVU_ACTIVATION_STEP.STEP_3,
-      ]) {
-        expect(pasoAlcanzable(paso, type)).toBe(paso);
-      }
-    }
-  });
-
-  it("todo paso devuelto es uno que esa persona puede ver", () => {
-    for (const type of [
-      PERSON_TYPE.PERSONA_FISICA,
-      PERSON_TYPE.PERSONA_JURIDICA,
-    ]) {
-      const visibles = idsDe(type);
-      for (const paso of Object.values(CVU_ACTIVATION_STEP)) {
-        expect(visibles).toContain(pasoAlcanzable(paso, type));
+  it("ningun paso queda sin nombre", () => {
+    for (const type of Object.values(PERSON_TYPE)) {
+      for (const paso of pasosDe(type)) {
+        expect(typeof paso.label).toBe("string");
+        expect(paso.label.trim()).not.toBe("");
       }
     }
   });

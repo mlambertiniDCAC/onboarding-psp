@@ -8,6 +8,7 @@ import { ActivationStep1PersonalInfo } from "../steps/step1/PF/ActivationStep1Pe
 import { ActivationStep1LegalEntityType } from "../steps/step1/PJ/ActivationStep1LegalEntityType";
 import { ActivationStep2Documentation } from "../steps/step2/PJ/ActivationStep2Documentation";
 import { TermsAndConditionsStep } from "../steps/step3/TermsAndConditionsStep";
+import IdentityValidationStep from "src/features/identityValidation/IdentityValidationStep";
 import {
   CVU_ACTIVATION_STEP,
   PERSON_TYPE,
@@ -51,7 +52,12 @@ const ActivateAccountCvuLayout = ({
       case CVU_ACTIVATION_STEP.STEP_2:
         return personType === PERSON_TYPE.PERSONA_JURIDICA ? (
           <ActivationStep2Documentation onStepChange={onStepChange} />
-        ) : null;
+        ) : (
+          <IdentityValidationStep
+            onDone={() => onStepChange(CVU_ACTIVATION_STEP.STEP_3)}
+            onPrevious={() => onStepChange(CVU_ACTIVATION_STEP.STEP_1)}
+          />
+        );
       case CVU_ACTIVATION_STEP.STEP_3:
         return (
           <TermsAndConditionsStep
