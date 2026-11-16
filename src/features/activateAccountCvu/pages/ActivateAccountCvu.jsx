@@ -8,6 +8,7 @@ import {
   STEP_QUERY_PARAM,
   TYPE_QUERY_PARAM,
   parsePersonTypeFromUrl,
+  pasoAlcanzable,
 } from "../lib/constants";
 import { selectDefaultSocietyId } from "src/slices/profile/profileSelectors";
 import { fetchCvuActivationStatus } from "../store/cvuActivation/cvuActivationActions";
@@ -68,9 +69,9 @@ const ActivateAccountCvu = () => {
   useEffect(() => {
     if (!hasResumedRef.current && registrationStatus?.currentStep != null) {
       hasResumedRef.current = true;
-      goToStep(registrationStatus.currentStep);
+      goToStep(pasoAlcanzable(registrationStatus.currentStep, personType));
     }
-  }, [registrationStatus]);
+  }, [registrationStatus, personType]);
 
   return (
     <ActivateAccountCvuLayout

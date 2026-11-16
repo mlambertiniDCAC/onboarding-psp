@@ -47,6 +47,14 @@ export const parsePersonTypeFromUrl = (searchParams) => {
   return VALID_PERSON_TYPES.includes(raw) ? raw : null;
 };
 
+export const tieneDocumentacion = (type) =>
+  type === PERSON_TYPE.PERSONA_JURIDICA;
+
+export const pasoAlcanzable = (paso, type) =>
+  paso === CVU_ACTIVATION_STEP.STEP_2 && !tieneDocumentacion(type)
+    ? CVU_ACTIVATION_STEP.STEP_3
+    : paso;
+
 export const cvuActivationStepsByType = (type = PERSON_TYPE.PERSONA_FISICA) => {
   return [
     {
@@ -60,7 +68,9 @@ export const cvuActivationStepsByType = (type = PERSON_TYPE.PERSONA_FISICA) => {
           ? "Información personal"
           : "Tipo de sociedad",
     },
-    { id: CVU_ACTIVATION_STEP.STEP_2, label: "Documentación" },
+    ...(tieneDocumentacion(type)
+      ? [{ id: CVU_ACTIVATION_STEP.STEP_2, label: "Documentación" }]
+      : []),
     { id: CVU_ACTIVATION_STEP.STEP_3, label: "Términos y condiciones" },
   ];
 };
