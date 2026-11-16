@@ -94,10 +94,7 @@ export const TermsAndConditionsStep = ({ personType, onStepChange }) => {
 
   // Paso anterior según el tipo de persona: PJ vuelve a Documentación (paso 2),
   // PF vuelve a Información personal (paso 1, no tiene paso de documentación).
-  const previousStep =
-    personType === PERSON_TYPE.PERSONA_JURIDICA
-      ? CVU_ACTIVATION_STEP.STEP_2
-      : CVU_ACTIVATION_STEP.STEP_1;
+  const previousStep = CVU_ACTIVATION_STEP.STEP_2;
 
   const handleScroll = (event) => {
     if (hasReadTerms) return;

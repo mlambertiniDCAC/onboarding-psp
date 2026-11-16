@@ -43,6 +43,11 @@ const ERROR_ESTADO =
 const ERROR_INICIO =
   "No pudimos iniciar la validación de identidad. Volvé a intentar.";
 
+const ERROR_PESTANIA =
+  "El navegador bloqueó la pestaña de 4i. Permitilas para este sitio y volvé a intentar.";
+
+const ESPERA_ENTRE_CONSULTAS_MS = 5000;
+
 const leerRetorno = (searchParams) => {
   const resultado = searchParams.get(RESULT_QUERY_PARAM);
   if (!resultado) return null;
@@ -60,23 +65,40 @@ const IdentityValidationStep = ({ onDone, onPrevious }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState(null);
+  const [esperandoA4i, setEsperandoA4i] = useState(false);
 
-  const loadEstado = async () => {
-    setIsLoading(true);
-    setError(null);
+  const consultarEstado = async (silencioso) => {
+    if (!silencioso) {
+      setIsLoading(true);
+      setError(null);
+    }
     try {
       const response = await axiosInstance.get(IDENTITY_ME_PATH);
-      setEstado(response?.data ?? null);
+      const datos = response?.data ?? null;
+      setEstado(datos);
+      return datos;
     } catch {
-      setError(ERROR_ESTADO);
+      if (!silencioso) setError(ERROR_ESTADO);
+      return null;
     } finally {
-      setIsLoading(false);
+      if (!silencioso) setIsLoading(false);
     }
   };
+
+  const loadEstado = () => consultarEstado(false);
 
   useEffect(() => {
     loadEstado();
   }, []);
+
+  useEffect(() => {
+    if (!esperandoA4i) return undefined;
+    const reloj = setInterval(async () => {
+      const datos = await consultarEstado(true);
+      if (datos?.validada) setEsperandoA4i(false);
+    }, ESPERA_ENTRE_CONSULTAS_MS);
+    return () => clearInterval(reloj);
+  }, [esperandoA4i]);
 
   useEffect(() => {
     if (!searchParams.has(RESULT_QUERY_PARAM)) return;
@@ -99,7 +121,14 @@ const IdentityValidationStep = ({ onDone, onPrevious }) => {
       const response = await axiosInstance.post(IDENTITY_VALIDATE_PATH, {});
       const url = response?.data?.url_4i ?? null;
       if (url) {
-        window.location.assign(url);
+        const pestania = window.open(url, "_blank", "noopener");
+        if (!pestania) {
+          setError(ERROR_PESTANIA);
+          setIsStarting(false);
+          return;
+        }
+        setEsperandoA4i(true);
+        setIsStarting(false);
         return;
       }
       setError(ERROR_INICIO);
@@ -127,6 +156,7 @@ const IdentityValidationStep = ({ onDone, onPrevious }) => {
   const resolveNextAction = () => {
     if (isLoading) return { label: "Validar mi identidad", run: null };
     if (isValidated) return { label: "Siguiente", run: onDone };
+    if (esperandoA4i) return { label: "Ya terminé en 4i", run: loadEstado };
     if (outcome?.canRefresh)
       return { label: "Actualizar estado", run: loadEstado };
     if (outcome?.canRetry) return { label: "Reintentar", run: startValidation };
@@ -166,12 +196,25 @@ const IdentityValidationStep = ({ onDone, onPrevious }) => {
                 message={outcome.message}
               />
             )}
-            {!isLoading && !outcome && (
+            {!isLoading && !outcome && esperandoA4i && (
+              <>
+                <InfoMessage
+                  variant="info"
+                  message="Abrimos 4i en otra pestaña. Terminá ahí y volvé acá: esta pantalla se actualiza sola."
+                />
+                <Typography variant="regular">
+                  Si estás en una computadora, en esa pestaña vas a ver un
+                  código QR para escanear con el celular. Validá desde el
+                  teléfono y después volvé a esta pantalla.
+                </Typography>
+              </>
+            )}
+            {!isLoading && !outcome && !esperandoA4i && (
               <>
                 <Typography variant="regular">
-                  Al continuar salís de esta pantalla y vas al proceso de
-                  validación de 4i, donde le sacás una foto a tu documento y a
-                  tu cara. Cuando termines volvés acá solo.
+                  Al continuar abrimos el proceso de validación de 4i en una
+                  pestaña nueva, donde le sacás una foto a tu documento y a tu
+                  cara. Esta pantalla queda abierta esperándote.
                 </Typography>
                 <Typography variant="regular">
                   Si entrás desde una computadora vas a ver un código QR para
