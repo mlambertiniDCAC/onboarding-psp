@@ -11,7 +11,6 @@ import { Button } from "components/Button";
 import axiosInstance from "src/lib/axiosInstance";
 import {
   IDENTITY_ME_PATH,
-  IDENTITY_SCREEN_QUERY_PARAM,
   IDENTITY_VALIDATE_PATH,
   RESULT_QUERY_PARAM,
   RETURN_GROUP_QUERY_PARAM,
@@ -88,7 +87,6 @@ const IdentityValidationStep = ({ onDone, onPrevious }) => {
         prev.delete(RESULT_QUERY_PARAM);
         prev.delete(RETURN_STEP_QUERY_PARAM);
         prev.delete(RETURN_GROUP_QUERY_PARAM);
-        prev.set(IDENTITY_SCREEN_QUERY_PARAM, "1");
         return prev;
       },
       { replace: true }

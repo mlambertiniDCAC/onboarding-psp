@@ -9,42 +9,13 @@ import { loggedOut } from "./features/auth/authSlice";
 import OnboardingLoginPage from "./features/auth/OnboardingLoginPage";
 import { Button } from "./components/Button";
 import ActivateAccountCvu from "./features/activateAccountCvu/pages/ActivateAccountCvu";
-import IdentityValidationStep from "./features/identityValidation/IdentityValidationStep";
 import ComplianceStatusGate from "./features/complianceStatus/ComplianceStatusGate";
-import {
-  IDENTITY_SCREEN_QUERY_PARAM,
-  RESULT_QUERY_PARAM,
-} from "./features/identityValidation/lib/constants";
 
 const TopBar = styled.div`
   display: flex;
   justify-content: flex-end;
   padding: 12px 24px;
 `;
-
-const CvuWizardGate = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isIdentityScreen =
-    searchParams.has(RESULT_QUERY_PARAM) ||
-    searchParams.has(IDENTITY_SCREEN_QUERY_PARAM);
-
-  if (!isIdentityScreen) {
-    return <ActivateAccountCvu />;
-  }
-
-  const volverAlAlta = () =>
-    setSearchParams(
-      (prev) => {
-        prev.delete(IDENTITY_SCREEN_QUERY_PARAM);
-        return prev;
-      },
-      { replace: true }
-    );
-
-  return (
-    <IdentityValidationStep onDone={volverAlAlta} onPrevious={volverAlAlta} />
-  );
-};
 
 const App = () => {
   const dispatch = useDispatch();
@@ -89,7 +60,7 @@ const App = () => {
           path="*"
           element={
             <ComplianceStatusGate sujetoId={sujetoId}>
-              <CvuWizardGate />
+              <ActivateAccountCvu />
             </ComplianceStatusGate>
           }
         />

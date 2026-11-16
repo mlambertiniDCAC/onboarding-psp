@@ -157,7 +157,7 @@ describe("IdentityValidationStep", () => {
     expect(await screen.findByText(/Validamos tu identidad/i)).toBeTruthy();
   });
 
-  it("limpia el retorno de la query y deja la pantalla de identidad", async () => {
+  it("limpia el retorno de la query sin sacar al usuario del wizard", async () => {
     mockEstado({ validada: true });
 
     const UrlProbe = () => {
@@ -176,9 +176,7 @@ describe("IdentityValidationStep", () => {
       </MemoryRouter>
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("url").textContent).toBe("identidad=1")
-    );
+    await waitFor(() => expect(screen.getByTestId("url").textContent).toBe(""));
     expect(await screen.findByText(/Validamos tu identidad/i)).toBeTruthy();
   });
 

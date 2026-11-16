@@ -9,6 +9,7 @@ import {
   TYPE_QUERY_PARAM,
   parsePersonTypeFromUrl,
 } from "../lib/constants";
+import { RESULT_QUERY_PARAM } from "src/features/identityValidation/lib/constants";
 import { selectDefaultSocietyId } from "src/slices/profile/profileSelectors";
 import { fetchCvuActivationStatus } from "../store/cvuActivation/cvuActivationActions";
 import {
@@ -29,8 +30,9 @@ const parseStepFromUrl = (searchParams) => {
 const ActivateAccountCvu = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [vuelveDe4i] = useState(() => searchParams.has(RESULT_QUERY_PARAM));
   const [currentStep, setCurrentStep] = useState(() =>
-    parseStepFromUrl(searchParams)
+    vuelveDe4i ? CVU_ACTIVATION_STEP.STEP_2 : parseStepFromUrl(searchParams)
   );
 
   const registrationStatus = useSelector(selectRegistrationStatus);
@@ -62,15 +64,18 @@ const ActivateAccountCvu = () => {
     if (societyId) dispatch(fetchCvuActivationStatus(societyId));
   }, [dispatch, societyId]);
 
-  // Reanuda en el paso guardado por el back, pero solo la primera vez: los refreshes
-  // posteriores del status (p. ej. tras guardar un paso) no deben reubicar al usuario.
-  const hasResumedRef = useRef(false);
+  const hasResumedRef = useRef(vuelveDe4i);
   useEffect(() => {
     if (!hasResumedRef.current && registrationStatus?.currentStep != null) {
       hasResumedRef.current = true;
       goToStep(registrationStatus.currentStep);
     }
   }, [registrationStatus]);
+
+  useEffect(() => {
+    if (!vuelveDe4i) return;
+    goToStep(CVU_ACTIVATION_STEP.STEP_2, { type: personType });
+  }, []);
 
   return (
     <ActivateAccountCvuLayout

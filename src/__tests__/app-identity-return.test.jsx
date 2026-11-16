@@ -73,7 +73,7 @@ describe("App con el retorno de la validación de identidad en la URL", () => {
       "/?type=PF&resultado=timeout&identidad_step=701&grupo=SESION_VENCIDA"
     );
 
-    expect(await screen.findByText(/Validación de identidad/i)).toBeTruthy();
+    expect(await screen.findByText(/Validá tu identidad con 4i/i)).toBeTruthy();
     expect(
       await screen.findByText(/venció antes de que la termines/i)
     ).toBeTruthy();
@@ -82,7 +82,7 @@ describe("App con el retorno de la validación de identidad en la URL", () => {
   it("cae en el paso de identidad aunque el retorno llegue sin el tipo de persona", async () => {
     renderAt("/?resultado=exit&identidad_step=121&grupo=SALIDA_USUARIO");
 
-    expect(await screen.findByText(/Validación de identidad/i)).toBeTruthy();
+    expect(await screen.findByText(/Validá tu identidad con 4i/i)).toBeTruthy();
     expect(await screen.findByText(/Saliste de la validación/i)).toBeTruthy();
   });
 
@@ -90,6 +90,6 @@ describe("App con el retorno de la validación de identidad en la URL", () => {
     renderAt("/");
 
     expect(await screen.findByText(/Activar mi cuenta CVU/i)).toBeTruthy();
-    expect(screen.queryByText(/Validación de identidad/i)).toBeNull();
+    expect(screen.queryByText(/Validá tu identidad con 4i/i)).toBeNull();
   });
 });

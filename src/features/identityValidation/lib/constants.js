@@ -4,8 +4,6 @@ export const IDENTITY_VALIDATE_PATH = "/v1/identidad/validar";
 
 export const RESULT_QUERY_PARAM = "resultado";
 
-export const IDENTITY_SCREEN_QUERY_PARAM = "identidad";
-
 export const RETURN_STEP_QUERY_PARAM = "identidad_step";
 
 export const RETURN_GROUP_QUERY_PARAM = "grupo";
