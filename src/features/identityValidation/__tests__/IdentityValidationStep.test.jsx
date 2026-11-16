@@ -46,8 +46,8 @@ const stubAssign = () => {
   return assign;
 };
 
-const stubOpen = (pestania = {}) => {
-  const open = vi.fn(() => pestania);
+const stubOpen = () => {
+  const open = vi.fn(() => ({}));
   vi.stubGlobal("open", open);
   return open;
 };
@@ -92,15 +92,15 @@ describe("IdentityValidationStep", () => {
     expect(axiosInstance.post.mock.calls.length).toBe(postsAntes);
   });
 
-  it("abre 4i en una pestaña nueva y deja esta pantalla esperando", async () => {
+  it("sale a 4i en la misma pestaña, no en una nueva", async () => {
     mockEstado({ validada: false, validacion_en_curso: false });
     mockValidar({
       usuario_sub: "sub-1",
       validacion_id: 77,
       url_4i: "https://admin.4i4id.com/webapp-citizens/t/abc",
     });
-    const open = stubOpen();
     const assign = stubAssign();
+    const open = stubOpen();
     const postsAntes = axiosInstance.post.mock.calls.length;
 
     renderStep();
@@ -115,47 +115,22 @@ describe("IdentityValidationStep", () => {
       {},
     ]);
     await waitFor(() =>
-      expect(open).toHaveBeenCalledWith(
-        "https://admin.4i4id.com/webapp-citizens/t/abc",
-        "_blank",
-        "noopener"
+      expect(assign).toHaveBeenCalledWith(
+        "https://admin.4i4id.com/webapp-citizens/t/abc"
       )
     );
-    expect(assign).not.toHaveBeenCalled();
-    expect(await screen.findByText(/Abrimos 4i en otra pestaña/i)).toBeTruthy();
+    expect(open).not.toHaveBeenCalled();
   });
 
-  it("avisa cuando el navegador bloquea la pestaña", async () => {
+  it("avisa que el resultado vuelve a esta misma pantalla", async () => {
     mockEstado({ validada: false, validacion_en_curso: false });
-    mockValidar({ validacion_id: 79, url_4i: "https://4i4id.com/t/xyz" });
-    stubOpen(null);
 
     renderStep();
 
-    fireEvent.click(await screen.findByText(/Validar mi identidad/i));
-
-    expect(await screen.findByText(/bloqueó la pestaña/i)).toBeTruthy();
-    expect(screen.queryByText(/Abrimos 4i en otra pestaña/i)).toBeNull();
-  });
-
-  it("mientras espera a 4i consulta el estado y habilita continuar al validarse", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    mockEstado(
-      { validada: false, validacion_en_curso: false },
-      { validada: true, validada_en: "2026-11-16T10:00:00Z" }
-    );
-    mockValidar({ validacion_id: 80, url_4i: "https://4i4id.com/t/poll" });
-    stubOpen();
-
-    renderStep();
-
-    fireEvent.click(await screen.findByText(/Validar mi identidad/i));
-    await screen.findByText(/Abrimos 4i en otra pestaña/i);
-
-    await vi.advanceTimersByTimeAsync(5000);
-
-    expect(await screen.findByText(/^Siguiente$/i)).toBeTruthy();
-    vi.useRealTimers();
+    expect(
+      await screen.findByText(/te devuelve a esta pantalla/i)
+    ).toBeTruthy();
+    expect(await screen.findByText(/no cierres esta pestaña/i)).toBeTruthy();
   });
 
   it("habilita continuar cuando vuelve con resultado success y el backend lo confirma", async () => {
@@ -222,7 +197,7 @@ describe("IdentityValidationStep", () => {
   it("reintenta desde el mensaje de sesión vencida", async () => {
     mockEstado({ validada: false, validacion_en_curso: true });
     mockValidar({ validacion_id: 78, url_4i: "https://4i4id.com/t/def" });
-    const open = stubOpen();
+    const assign = stubAssign();
 
     renderStep(
       "/?type=PF&resultado=timeout&identidad_step=701&grupo=SESION_VENCIDA"
@@ -234,11 +209,7 @@ describe("IdentityValidationStep", () => {
     fireEvent.click(await screen.findByText(/^Reintentar$/i));
 
     await waitFor(() =>
-      expect(open).toHaveBeenCalledWith(
-        "https://4i4id.com/t/def",
-        "_blank",
-        "noopener"
-      )
+      expect(assign).toHaveBeenCalledWith("https://4i4id.com/t/def")
     );
   });
 
